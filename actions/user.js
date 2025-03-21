@@ -1,5 +1,4 @@
 "use server";
-
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
@@ -30,9 +29,9 @@ export async function updateUser(data) {
               industry: data.industry,
               salaryRanges: [], //Default empty array
               growthRate: 0, //Default value
-              demandLevel: "Medium", //Default value
+              demandLevel: "MEDIUM", //Default value
               topSkills: [], //Default empty array
-              MarketOutlook: "Neutral", //default value
+              marketOutlook: "NEUTRAL", //default value
               keyTrends: [], //Default empty array
               recommendedSkills: [], //Default empty array
               nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), //1 week from now
@@ -57,10 +56,10 @@ export async function updateUser(data) {
         timeout: 10000, //default:5000
       }
     );
-    return result.user;
+    return { success: true, ...result };
   } catch (error) {
     console.error("Error updating user and industry:", error.message);
-    throw new Error("Failed to update profile");
+    throw new Error("Failed to update profile" + error.message);
   }
 }
 
@@ -85,10 +84,10 @@ export async function getUserOnboardingStatus() {
       },
     });
     return {
-      isOnboarded:!!user?.industry,
-    }
+      isOnboarded: !!user?.industry,
+    };
   } catch (error) {
-    console.error("Error checking onboarding status:",error.message);
+    console.error("Error checking onboarding status:", error.message);
     throw new Error("Failed to check onboarding status");
   }
 }
