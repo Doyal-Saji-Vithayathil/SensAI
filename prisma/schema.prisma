@@ -14,19 +14,19 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(uuid())
-  clerkUserId      String            @unique
-  email            String            @unique
-  name             String?
-  imageUrl         String?
-  industry         String?
+  id              String           @id @default(uuid())
+  clerkUserId     String           @unique
+  email           String           @unique
+  name            String?
+  imageUrl        String?
+  industry        String?
   industryInsight IndustryInsight? @relation(fields: [industry], references: [industry])
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   // Profile fields
-  bio              String?
-  experience       Int?
-  skills           String[] //Array of skills
+  bio             String?
+  experience      Int?
+  skills          String[] //Array of skills
 
   assessments Assessment[]
   resume      Resume?
@@ -64,6 +64,7 @@ model CoverLetter {
   jobDescription String?
   companyName    String
   jobTitle       String
+  status         String   @default("draft")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -71,8 +72,8 @@ model CoverLetter {
 }
 
 model IndustryInsight {
-  id                String   @id @default(cuid())
-  industry          String   @unique
+  id                String        @id @default(cuid())
+  industry          String        @unique
   users             User[]
   salaryRanges      Json[]
   growthRate        Float
@@ -81,7 +82,7 @@ model IndustryInsight {
   marketOutlook     MarketOutlook
   keyTrends         String[]
   recommendedSkills String[]
-  lastUpdated       DateTime @default(now())
+  lastUpdated       DateTime      @default(now())
   nextUpdate        DateTime
 
   @@index([industry])
