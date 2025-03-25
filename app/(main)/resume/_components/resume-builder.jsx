@@ -7,19 +7,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import useFetch from "@/hooks/use-fetch";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertTriangle, Download, Edit, Monitor, Save } from "lucide-react";
+import {
+  AlertTriangle,
+  Download,
+  Edit,
+  Loader2,
+  Monitor,
+  Save,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import EntryForm from "./entry-form";
 import { entriesToMarkdown } from "@/app/lib/helper";
 import MDEditor from "@uiw/react-md-editor";
 import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 const ResumeBuilder = ({ initialContent }) => {
   const [activeTab, setActiveTab] = useState("edit");
   const [resumeMode, setResumeMode] = useState("preview");
   const [previewContent, setPreviewContent] = useState(initialContent);
   const { user } = useUser();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const {
     control,
@@ -69,7 +78,7 @@ const ResumeBuilder = ({ initialContent }) => {
     if (contactInfo.github) parts.push(`🐙 [Github](${contactInfo.github})`);
 
     return parts.length > 0
-      ? `## <div align="center">${user.fullname}</div>
+      ? `## <div align="center">${user.fullName}</div>
     \n\n<div align="center">\n\n${parts.join(" | ")}\n\n</div>`
       : "";
   };
@@ -89,8 +98,109 @@ const ResumeBuilder = ({ initialContent }) => {
       .join("\n\n");
   };
 
-  const onSubmit = async (data) => {};
+  useEffect(() => {
+    if (saveResult && !isSaving) {
+      toast.success("Resume saved successfully!");
+    }
+    if (saveError) {
+      toast.error(saveError.message || "Failed to save resume");
+    }
+  }, [saveResult, saveError, isSaving]);
 
+  const onSubmit = async () => {
+    try {
+      await saveResumeFn(previewContent);
+    } catch (error) {
+      console.error("Save error:", error);
+    }
+  };
+
+  const generatePDF = async () => {
+    setIsGenerating(true);
+    try {
+      const element = document.getElementById("resume-pdf");
+      if (!element) {
+        alert(
+          "Error: Resume preview is missing. Try switching to preview mode."
+        );
+        return;
+      }
+
+      const previewContainer = document.querySelector(".wmde-markdown");
+      if (!previewContainer) {
+        alert(
+          "Error: Preview container not found. Ensure you're in preview mode."
+        );
+        return;
+      }
+
+      const stylesheets = Array.from(document.styleSheets)
+        .map((sheet) => {
+          try {
+            return Array.from(sheet.cssRules)
+              .map((rule) => rule.cssText)
+              .join("\n");
+          } catch (e) {
+            console.warn("Could not access some styles:", e);
+            return "";
+          }
+        })
+        .filter(Boolean)
+        .join("\n");
+
+      const htmlContent = `
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              ${stylesheets}
+              /* Ensure basic PDF compatibility */
+              body {}
+                background: white;
+                color: black;
+              }
+              .wmde-markdown {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                line-height: 1.6;
+              }
+              /* Ensure icons render correctly */
+              .wmde-markdown * {
+                font-family: inherit !important;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="wmde-markdown">
+              ${previewContainer.innerHTML}
+            </div>
+          </body>
+        </html>
+      `;
+
+      const response = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ htmlContent }),
+      });
+
+      if (!response.ok) throw new Error("Failed to generate PDF");
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "resume.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      alert("Failed to generate PDF. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
   return (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-center gap-2">
@@ -99,13 +209,31 @@ const ResumeBuilder = ({ initialContent }) => {
         </h1>
 
         <div className="space-x-2">
-          <Button variant="destructive">
-            <Save className="h-4 w-4" />
-            Save
+          <Button variant="destructive" onClick={onSubmit} disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Save
+              </>
+            )}
           </Button>
-          <Button>
-            <Download className="h-4 w-4" />
-            Download PDF
+          <Button onClick={generatePDF} disabled={isGenerating}>
+            {isGenerating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating PDF...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                Download PDF
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -319,6 +447,21 @@ const ResumeBuilder = ({ initialContent }) => {
               height={800}
               preview={resumeMode}
             />
+          </div>
+
+          <div className="hidden">
+            <div
+              id="resume-pdf"
+              style={{ position: "absolute", left: "-9999px" }}
+            >
+              <MDEditor.Markdown
+                source={previewContent}
+                style={{
+                  background: "white",
+                  color: "black",
+                }}
+              />
+            </div>
           </div>
         </TabsContent>
       </Tabs>
