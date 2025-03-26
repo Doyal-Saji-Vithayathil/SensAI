@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# AI Career Coach
 
-## Getting Started
+## 🚀 Overview
+AI Career Coach is a full-stack AI-powered career coaching platform built using modern technologies like React 19, Next.js 15, Tailwind CSS, NeonDB, Prisma, Clerk Authentication, Inngest, and the Gemini API. This project provides AI-driven industry insights, mock interview preparation, resume building, and cover letter generation to help users advance their careers.
 
-First, run the development server:
+## 🎯 Features
+- 🔑 **User Authentication** (Register, Login, Logout) with Clerk
+- 📂 **Database Management** using NeonDB & Prisma
+- 🔄 **Inngest for Scheduling & Background Tasks**
+- 🤖 **AI-Powered Industry Insights & Career Guidance**
+- 🎤 **Mock Interview Question Generation with AI**
+- 📊 **Interview Performance Analytics**
+- 📄 **AI Resume & Cover Letter Generator**
+- 📥 **Download Resume as PDF**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🛠️ Tech Stack
+- **Frontend:** React 19, Next.js 15, Tailwind CSS, Shadcn UI
+- **Backend:** Next.js API Routes, Prisma, NeonDB, Inngest
+- **Authentication:** Clerk
+- **AI Integration:** Gemini API
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🏗️ Setup & Installation
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/Doyal-Saji-Vithayathil/Welth.git
+   cd ai-career-coach
+   ```
+2. **Install dependencies:**
+   ```sh
+   npm install
+   ```
+3. **Set up environment variables:**
+   Create a `.env` file in the root directory and add the following:
+   ```env
+   NEXT_PUBLIC_CLERK_FRONTEND_API=your-clerk-api-key
+   CLERK_SECRET_KEY=your-clerk-secret-key
+   DATABASE_URL=your-neondb-connection-string
+   NEXT_PUBLIC_GEMINI_API_KEY=your-gemini-api-key
+   INNGEST_SIGNING_KEY=your-inngest-signing-key
+   ```
+4. **Start the development server:**
+   ```sh
+   npm run dev
+   ```
+5. **Deploy on Vercel:**
+   ```sh
+   vercel
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Future Enhancements
+- 🌎 **Multi-language Support**
+- 📅 **AI-powered Personalized Career Roadmap**
+- 📍 **Job Application Tracker**
+- 📢 **Community & Networking Features**
 
-## Learn More
+## 💡 Contributing
+Feel free to submit issues and pull requests! 🚀
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Made by [Doyal Saji Vithayathil](https://github.com/Doyal-Saji-Vithayathil)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
